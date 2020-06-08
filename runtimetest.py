@@ -23,11 +23,11 @@ GPIO.setup(18, GPIO.OUT)
 
 def writereadingsgetlux(filename, t):
     lux = sensor.lux
-    visible = sensor.visible
-    infrared = sensor.infrared
+    #visible = sensor.visible
+    #infrared = sensor.infrared
     with open (filename, "a") as f:
         writer = csv.writer(f, delimiter=",")
-        writer.writerow([t, lux, visible, infrared])
+        writer.writerow([t, lux])
     return lux
 
 def LEDblink(duration, state): 
@@ -58,7 +58,7 @@ print ("{}Saving as {}".format(timestamp(),filename))
 
 with open (filename, "a") as f:
     writer = csv.writer(f, delimiter=",")
-    writer.writerow(["time", "lux", "visible", "infrared"])
+    writer.writerow(["time", "lux"])
 
 sensorceiling = 88000.0
 ANSIlux = sensorceiling
