@@ -1,4 +1,5 @@
 # runtimetest.py
+# made for bmengineer.com
 # Record TSL2591 sensor to csv every 300 ms
 from time import strftime, gmtime, sleep
 import time
