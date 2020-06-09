@@ -49,7 +49,7 @@ def timestamp():
 # Parse inputs
 parser = argparse.ArgumentParser()
 parser.add_argument('-o','--outputfile', help='filename for the csv output')
-parser.add_argument('-d','--duration',help='duration of the test in minutes'type=float)
+parser.add_argument('-d','--duration',type=float,help='duration of the test in minutes')
 args = parser.parse_args()
 if args.outputfile:
     filename = args.outputfile
