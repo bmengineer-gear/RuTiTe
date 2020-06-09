@@ -12,6 +12,7 @@ import busio
 import adafruit_tsl2591
 import RPi.GPIO as GPIO
 import argparse
+import sys
 
 # Parse inputs
 parser = argparse.ArgumentParser()
@@ -19,6 +20,10 @@ parser.add_argument('-o','--outputfile', help='filename for the csv output')
 args = parser.parse_args()
 if args.outputfile:
     filename = args.outputfile
+    filenamesuffix = filename[-4:]
+    if filenamesuffix != '.csv':
+        sys.exit("Error: Output filename must end in '.csv'. Please try again with an appropriate filename.")
+
 else:
     filename = strftime("%Y%m%dTest.csv",gmtime())
 
