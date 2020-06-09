@@ -14,19 +14,6 @@ import RPi.GPIO as GPIO
 import argparse
 import sys
 
-# Parse inputs
-parser = argparse.ArgumentParser()
-parser.add_argument('-o','--outputfile', help='filename for the csv output')
-args = parser.parse_args()
-if args.outputfile:
-    filename = args.outputfile
-    filenamesuffix = filename[-4:]
-    if filenamesuffix != '.csv':
-        sys.exit("Error: Output filename must end in '.csv'. Please try again with an appropriate filename.")
-
-else:
-    filename = strftime("%Y%m%dTest.csv",gmtime())
-
 # Initialize the I2C bus
 i2c = busio.I2C(board.SCL, board.SDA)
 # Initialize the sensor
@@ -59,6 +46,23 @@ def timestamp():
     currenttime = time.strftime("%H:%M:%S ", t)
     return currenttime
 
+# Parse inputs
+parser = argparse.ArgumentParser()
+parser.add_argument('-o','--outputfile', help='filename for the csv output')
+parser.add_argument('-d','--duration',type=float,help='duration of the test in minutes')
+args = parser.parse_args()
+if args.outputfile:
+    filename = args.outputfile
+    filenamesuffix = filename[-4:]
+    if filenamesuffix != '.csv':
+        sys.exit("Error: Output filename must end in '.csv'. Please try again with an appropriate filename.")
+else:
+    filename = strftime("%Y%m%dTest.csv",gmtime())
+if args.duration:
+    testduration = args.duration*60.0
+else:
+    testduration = 86400.0
+
 # Check for file conflicts
 if os.path.isfile(filename):
     print ("{}{} already exists. Checking for an an available name to avoid overwriting something important...".format(timestamp(),filename))
@@ -82,7 +86,9 @@ nextprintpercent = 95
 tstart = time.time()
 t5seconds = tstart + 5.0
 t35seconds = tstart + 35.0
-tterminate = tstart + 86400.0 #max 24 hour test duration
+tterminate = tstart + testduration
+
+
 
 # Buffer to start test
 t = time.time()
@@ -119,11 +125,12 @@ while t < tterminate:
         if nextprintpercent < 10:#Runtime test is done, measure for a bit longer then stop the test
             GPIO.output(18, GPIO.HIGH)
             blinking = "ON"
-            tremaining = (t - tstart)/10
-            if tremaining > 3600:
-                tremaining = 3600
-            minutesremaining = tremaining/60
-            tterminate = tstart + tremaining
+            tremaining = (t - tstart)/10.0
+            if tremaining > 3600.0:
+                tremaining = 3600.0
+            if (tstart+tremaining) < tterminate:
+                tterminate = tstart+tremaining
+            minutesremaining = tremaining/60.0
             print("{}Test will end in {:.1f} minutes".format(timestamp(),minutesremaining))
     LEDblink(.1, blinking)
     time.sleep(.8)
