@@ -21,7 +21,11 @@ sensor = adafruit_tsl2591.TSL2591(i2c)
 # Setup LED
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(18, GPIO.OUT)
+GPIO.setup(17, GPIO.OUT) #RunningLED
+GPIO.setup(27, GPIO.OUT) #WritingLED
+GPIO.setup(22, GPIO.OUT) #EndingLED
+
+GPIO.output(17, GPIO.HIGH)
 
 # Define functions
 def writereadingsgetlux(filename, t):
@@ -32,15 +36,14 @@ def writereadingsgetlux(filename, t):
         writer = csv.writer(f, delimiter=",")
         writer.writerow([t, lux])
     return lux
-def LEDblink(duration, state): 
-    if state == "ON":
-        GPIO.output(18, GPIO.HIGH)
-        time.sleep(duration)
-        GPIO.output(18, GPIO.LOW)
+def writingLEDblink(state):
+    if state == 1:
+        GPIO.output(27, GPIO.HIGH)
+        state = 0
     else:
-        GPIO.output(18, GPIO.LOW)
-        time.sleep(duration)
-        GPIO.output(18, GPIO.HIGH)
+        GPIO.output(27, GPIO.LOW)
+        state = 1
+    return state
 def timestamp():
     t = time.localtime()
     currenttime = time.strftime("%H:%M:%S ", t)
@@ -78,6 +81,7 @@ print ("{}Saving as {}".format(timestamp(),filename))
 with open (filename, "a") as f:
     writer = csv.writer(f, delimiter=",")
     writer.writerow(["time", "lux"])
+    state = writingLEDblink(1)
 
 # Constants
 sensorceiling = 88000.0
@@ -88,34 +92,31 @@ t5seconds = tstart + 5.0
 t35seconds = tstart + 35.0
 tterminate = tstart + testduration
 
-
-
 # Buffer to start test
 t = time.time()
 while t < t5seconds:
     t = time.time()
     lux = writereadingsgetlux(filename, t)
-    LEDblink(.05, "ON")
-    time.sleep(.95)
+    state = writingLEDblink(state)
+    time.sleep(1.0)
 
 # Sampling period where max is set
 while t < t35seconds:
     t = time.time()
     lux = writereadingsgetlux(filename, t)
+    state = writingLEDblink(state)
     if lux < ANSIlux:
         ANSIlux = lux
-    LEDblink(.05, "ON")
-    time.sleep(.95)
+    time.sleep(1.0)
 if ANSIlux == 88000.0:
     print("{}Sensor is saturated. The light is too bright to measure with your current setup.".format(timestamp()))
 
 # Main recording code
-GPIO.output(18, GPIO.HIGH)
-blinking = "OFF"
 print ("{}ANSI lux = {}".format(timestamp(),ANSIlux))
 while t < tterminate:
     t = time.time()
     lux = writereadingsgetlux(filename, t)
+    state = writingLEDblink(state)
     percentofANSIlux=lux/ANSIlux*100
     if percentofANSIlux < nextprintpercent:
         tsincestart = t - tstart
@@ -123,8 +124,7 @@ while t < tterminate:
         while nextprintpercent > percentofANSIlux:
             nextprintpercent -= 5
         if nextprintpercent < 10:#Runtime test is done, measure for a bit longer then stop the test
-            GPIO.output(18, GPIO.HIGH)
-            blinking = "ON"
+            GPIO.output(22, GPIO.HIGH)
             tremaining = (t - tstart)/10.0
             if tremaining > 3600.0:
                 tremaining = 3600.0
@@ -132,6 +132,7 @@ while t < tterminate:
                 tterminate = tstart+tremaining
             minutesremaining = tremaining/60.0
             print("{}Test will end in {:.1f} minutes".format(timestamp(),minutesremaining))
-    LEDblink(.1, blinking)
-    time.sleep(.8)
+    time.sleep(1.0)
 print("{}Test complete".format(timestamp()))
+GPIO.output(17, GPIO.LOW)
+GPIO.output(27, GPIO.HIGH)
