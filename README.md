@@ -1,5 +1,5 @@
-# runtimetest
-Python script to record flashlight runtime using a Raspberry Pi and a TSL2591.
+# RuTiTe
+Python script to record flashlight runtime test (RuTiTe) using a Raspberry Pi and a TSL2591.
 # limitations
 Maximum lux of the sensor is 88,000. If the lux recorded by the sensor is too high, you should adjust your setup so less light is hitting the sensor.
 The test will run for a maximum of 24 hours.
