@@ -26,6 +26,8 @@ GPIO.setup(27, GPIO.OUT) #WritingLED
 GPIO.setup(22, GPIO.OUT) #EndingLED
 
 GPIO.output(17, GPIO.HIGH)
+GPIO.output(27, GPIO.LOW)
+GPIO.output(22, GPIO.LOW)
 
 # Define functions
 def writereadingsgetlux(filename, t):
@@ -58,6 +60,9 @@ if args.outputfile:
     filename = args.outputfile
     filenamesuffix = filename[-4:]
     if filenamesuffix != '.csv':
+        GPIO.output(17, GPIO.LOW)
+        GPIO.output(27, GPIO.LOW)
+        GPIO.output(22, GPIO.HIGH)
         sys.exit("Error: Output filename must end in '.csv'. Please try again with an appropriate filename.")
 else:
     filename = strftime("%Y%m%dTest.csv",gmtime())
@@ -120,7 +125,7 @@ while t < tterminate:
     percentofANSIlux=lux/ANSIlux*100
     if percentofANSIlux < nextprintpercent:
         tsincestart = t - tstart
-        print("{}{:.0f}% of {:.0f} after {:.0f} seconds at t={}".format(timestamp(),percentofANSIlux, ANSIlux, tsincestart,t))
+        print("{}{:.0f}% of {:.0f} ({:.0f})".format(timestamp(),percentofANSIlux, ANSIlux, lux))
         while nextprintpercent > percentofANSIlux:
             nextprintpercent -= 5
         if nextprintpercent < 10:#Runtime test is done, measure for a bit longer then stop the test
@@ -129,10 +134,11 @@ while t < tterminate:
             if tremaining > 3600.0:
                 tremaining = 3600.0
             if (tstart+tremaining) < tterminate:
-                tterminate = tstart+tremaining
+                tterminate = t+tremaining
             minutesremaining = tremaining/60.0
             print("{}Test will end in {:.1f} minutes".format(timestamp(),minutesremaining))
     time.sleep(1.0)
 print("{}Test complete".format(timestamp()))
 GPIO.output(17, GPIO.LOW)
+GPIO.output(22, GPIO.LOW)
 GPIO.output(27, GPIO.HIGH)

@@ -12,5 +12,8 @@ It's important that the light is turned on to the desired mode within 5 seconds 
 # planned changes
 - Add option to record IR mode for IR lights
 - Add option to customize output to the terminal while running
-- Add more indicating LEDs with clear functions
 - Switch from sloppy delays to scheduling
+- Add web sever to view test live
+- Add readout of min/max during sampling period
+- Make manual duration settings override auto-termination
+- Add script to plot results
