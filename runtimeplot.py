@@ -4,6 +4,19 @@ import csv
 import argparse
 import sys
 
+def labelpercentage(xdata,ydata,percentage):
+    indexat30s = next(x for x, val in enumerate(xdata) if val > 0.5)
+    outputat30s = ydata[indexat30s]
+    target = outputat30s * percentage / 100
+    targetindex = next(i for i, val in enumerate(ydata[indexat30s:]) if val < target) + indexat30s
+    xpos = xdata[targetindex]
+    ypos = ydata[targetindex]
+    if xpos < 60:
+        timestring = "{:.0f} min".format(xpos)
+    else:
+        timestring = "{:.1f} h".format(xpos/60)
+    plt.annotate("{} to {}%".format(timestring,percentage),(xpos,ypos))
+
 parser = argparse.ArgumentParser(description='Plot runtime graphs from csv files where the the first column is time and the second is output')
 parser.add_argument('-t','--title', help='title for the plot',default='Runtime')
 parser.add_argument('filenames', help='list of csv files to be plotted', nargs='+')
@@ -24,6 +37,7 @@ else:
     labels = range(len(filenames))
 
 title = args.title
+fig = plt.figure(figsize=(15,7.5))
 
 for i,filename in enumerate(filenames):
     time = []
@@ -38,8 +52,10 @@ for i,filename in enumerate(filenames):
     time = [(x - tstart) / 60 for x in time]
     if i == 0:
         indexat30s = next(x for x, val in enumerate(time) if val > 0.5)
-        outputat30s = relativeoutput[indexat30s]
-    relativeoutput = [(y / outputat30s)*100 for y in relativeoutput]
+        firstfileoutputat30s = relativeoutput[indexat30s]
+    relativeoutput = [(y / firstfileoutputat30s)*100 for y in relativeoutput]
+    labelpercentage(time,relativeoutput,50)
+    labelpercentage(time,relativeoutput,10)
     plt.plot(time,relativeoutput,label=labels[i])
 
 plt.xlim(left=0)
