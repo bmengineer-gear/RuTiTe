@@ -24,6 +24,7 @@ lux_to_lumen_factor = 1.0
 def init():
     i2c = busio.I2C(board.SCL, board.SDA)
     sensor = adafruit_tsl2591.TSL2591(i2c)
+    #sensor.gain = adafruit_tsl2591.GAIN_LOW
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(ready_led, GPIO.OUT)
