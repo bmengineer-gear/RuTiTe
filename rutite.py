@@ -36,10 +36,10 @@ def init():
     return sensor
 
 def write_to_csv(options, t, lux, t_test_start):
-    if options.absolute_time:
-        t_abs = t - t_test_start
+    if options.relative_time:
+        t_relative = t - t_test_start
     else:
-        t_abs = ''
+        t_relative = ''
     
     if options.lux_to_lumen_factor:
         lumens = lux * options.lux_to_lumen_factor
@@ -48,7 +48,7 @@ def write_to_csv(options, t, lux, t_test_start):
     
     with open (options.filename, "a") as f:
         writer = csv.writer(f, delimiter=",")
-        writer.writerow([t, lux, t_abs, lumens])
+        writer.writerow([t, lux, t_relative, lumens])
 
 def blink_led(pin):
     GPIO.output(pin, not GPIO.input(pin))
@@ -77,8 +77,8 @@ def build_parser():
     parser.add_argument('-lf', '--lux-to-lumen-factor', dest='lux_to_lumen_factor', type=float, 
             default=lux_to_lumen_factor, 
             help = 'lux to lumen conversion factor for use in calibrated integrating enclosures')
-    parser.add_argument('-a', '--absolute-time', dest='absolute_time',
-            help = 'record absolute time, with the first measurement at t=0')
+    parser.add_argument('-r', '--relative-time', dest='relative_time',
+            help = 'record relative time, with the first measurement at t=0')
     parser.add_argument('-g', '--graph-title', dest='graph_title',
             help = 'string to use for a basic plot of the recorded data - only works if you let the script run until it stops based on time or percent output')
     return parser
@@ -99,7 +99,7 @@ def load_options():
 def add_csv_header(filename):
     with open (filename, "a") as f:
         writer = csv.writer(f, delimiter=",")
-        writer.writerow(["time", "lux", "absolute time", "lumens"])
+        writer.writerow(["time", "lux", "[relative time]", "[lumens]"])
         blink_led(running_led)
 
 def core(options, sensor):
