@@ -19,7 +19,6 @@ ready_led = 17
 running_led = 27
 complete_led = 22
 sensor_ceiling = 88000.0
-lux_to_lumen_factor = 1.0
 
 def init():
     i2c = busio.I2C(board.SCL, board.SDA)
@@ -34,27 +33,6 @@ def init():
     GPIO.output(running_led, GPIO.LOW)
     GPIO.output(complete_led, GPIO.LOW)
     return sensor
-
-def write_to_csv(options, t, lux, t_test_start):
-    if options.relative_time:
-        t_relative = t - t_test_start
-    else:
-        t_relative = ''
-    
-    if options.lux_to_lumen_factor:
-        lumens = lux * options.lux_to_lumen_factor
-    else:
-        lumens = ''
-    
-    with open (options.filename, "a") as f:
-        writer = csv.writer(f, delimiter=",")
-        writer.writerow([t, lux, t_relative, lumens])
-
-def blink_led(pin):
-    GPIO.output(pin, not GPIO.input(pin))
-
-def current_timestamp():
-    return time.strftime("%H:%M:%S ", time.localtime())
 
 def build_parser():
     parser = argparse.ArgumentParser()
@@ -75,7 +53,6 @@ def build_parser():
     parser.add_argument('-pd','--print-delay', dest='time_between_prints', type=float, 
             help = 'minutes between printed updates to the terminal')
     parser.add_argument('-lf', '--lux-to-lumen-factor', dest='lux_to_lumen_factor', type=float, 
-            default=lux_to_lumen_factor, 
             help = 'lux to lumen conversion factor for use in calibrated integrating enclosures')
     parser.add_argument('-r', '--relative-time', dest='relative_time',
             help = 'record relative time, with the first measurement at t=0')
@@ -96,11 +73,32 @@ def load_options():
     print ("{}Saving as {}".format(current_timestamp(),options.filename))
     return options
 
+def blink_led(pin):
+    GPIO.output(pin, not GPIO.input(pin))
+
+def current_timestamp():
+    return time.strftime("%H:%M:%S ", time.localtime())
+
 def add_csv_header(filename):
     with open (filename, "a") as f:
         writer = csv.writer(f, delimiter=",")
         writer.writerow(["time", "lux", "[relative time]", "[lumens]"])
         blink_led(running_led)
+
+def write_to_csv(options, t, lux, t_test_start):
+    if options.relative_time:
+        t_relative = t - t_test_start
+    else:
+        t_relative = ''
+
+    if options.lux_to_lumen_factor:
+        lumens = lux * options.lux_to_lumen_factor
+    else:
+        lumens = ''
+
+    with open (options.filename, "a") as f:
+        writer = csv.writer(f, delimiter=",")
+        writer.writerow([t, lux, t_relative, lumens])
 
 def core(options, sensor):
     state = 'set_baseline'
@@ -122,7 +120,6 @@ def core(options, sensor):
 
         if state == 'waiting_for_threshold':
             blink_led(ready_led)
-            time.sleep(0.5)
 
         if state in ['sampling_period', 'main_recording']:
             write_to_csv(options, t, lux, t_test_start)
@@ -133,7 +130,6 @@ def core(options, sensor):
                 sampling_lux_min = lux
             if lux > sampling_lux_max:
                 sampling_lux_max = lux
-            time.sleep(0.5)
 
         if state == 'main_recording':
             percent_output = lux / lux_at_30s * 100.0
@@ -206,9 +202,9 @@ def core(options, sensor):
     GPIO.output(complete_led, GPIO.HIGH)
 
 def runtimeplot(options):
-    
+
     fig = plt.figure(figsize=(15, 10))
-    
+
     time = []
     brightness = []
 
@@ -217,19 +213,18 @@ def runtimeplot(options):
         next(data)
         for row in data:
             time.append(float(row[0]))
-            if options.lux_to_lumen_factor == 1.0:
-                brightness.append(float(row[1]))
-            else:
+            if options.lux_to_lumen_factor:
                 brightness.append(float(row[3]))
-    
+                y_label = 'Output [calculated lumens]'
+            else:
+                brightness.append(float(row[1]))
+                y_label = 'Output [detected lux]'
+
     t_test_start = time[1]
     time = [(x - t_test_start) / 60 for x in time]
     plt.plot(time, brightness)
     plt.xlabel('Time [minutes]')
-    if options.lux_to_lumen_factor == 1.0:
-        plt.ylabel('Output [detected lux]')
-    else:
-        plt.ylabel('Output [calculated lumens]')
+    plt.ylabel(y_label)
     plt.title(options.graph_title)
     plt.grid(True)
     plt.xlim(left=0)
