@@ -60,7 +60,6 @@ and the image looks like this:
 ![example plot](https://github.com/bmengineer-gear/RuTiTe/blob/state-machine/exampleplot.png)
 # Limitations
 Maximum lux of the sensor is 88,000. If the lux recorded by the sensor is too high, you should adjust your setup so less light is hitting the sensor.
-The test will run for a maximum of 24 hours unless a longer period is specified.
 # Hardware Setup
 This test uses a raspberry pi and the sensor. I've added LEDs to my setup for quick status indication at a glance, but these are completely optional. No screen is required if you're starting tests over ssh. An internet connection is required for timing.
 ![wiring diagram](https://github.com/bmengineer-gear/runtimetest/blob/master/runtimetestwiringdiagram.png)

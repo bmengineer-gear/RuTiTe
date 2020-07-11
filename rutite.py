@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # runtimetest.py
+# v 0.0.4-alpha pre-release
 
 from time import strftime, gmtime, sleep
 import time
@@ -201,7 +202,8 @@ def core(options, sensor):
     GPIO.output(complete_led, GPIO.HIGH)
 
 def runtimeplot(options):
-
+    
+    print('Creating plot...')
     fig = plt.figure(figsize=(15, 10))
 
     time = []
@@ -229,6 +231,7 @@ def runtimeplot(options):
     plt.xlim(left=0)
     plt.ylim(bottom=0)
     plt.savefig(options.graph_title+'.png')
+    print('plot saved')
 
 def main():
     sensor = init()
