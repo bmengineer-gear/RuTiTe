@@ -45,7 +45,6 @@ def build_parser():
     parser.add_argument('-d','--duration', dest='test_duration', type=float, 
             help = 'maximum duration of the test in minutes')
     parser.add_argument('-tp','--termination-percentage', dest='termination_percentage', type=float, 
-            default = 10.0, 
             help = 'percent output to stop recording at')
     parser.add_argument('-pp','--print-percentage', dest='percent_change_to_print', type=float, 
             default = 5.0, 
@@ -55,7 +54,7 @@ def build_parser():
     parser.add_argument('-lf', '--lux-to-lumen-factor', dest='lux_to_lumen_factor', type=float, 
             help = 'lux to lumen conversion factor for use in calibrated integrating enclosures')
     parser.add_argument('-r', '--relative-time', dest='relative_time',
-            help = 'record relative time, with the first measurement at t=0')
+            help = 'record relative time, with the first measurement at t=0', action='store_true')
     parser.add_argument('-g', '--graph-title', dest='graph_title',
             help = 'string to use for a basic plot of the recorded data - only works if you let the script run until it stops based on time or percent output')
     return parser
