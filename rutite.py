@@ -11,7 +11,8 @@ import csv
 import board
 import busio
 import adafruit_tsl2591
-import adafruit_adt7410
+#import adafruit_adt7410
+import adafruit_mcp9808
 import RPi.GPIO as GPIO
 import argparse
 import sys
@@ -26,8 +27,9 @@ def init():
     i2c = busio.I2C(board.SCL, board.SDA)
     light_sensor = adafruit_tsl2591.TSL2591(i2c)
     #light_sensor.gain = adafruit_tsl2591.GAIN_LOW
-    temp_sensor = adafruit_adt7410.ADT7410(i2c, address=0x48)
-    temp_sensor.high_resolution = True
+    #temp_sensor = adafruit_adt7410.ADT7410(i2c, address=0x48)
+    #temp_sensor.high_resolution = True
+    temp_sensor = adafruit_mcp9808.MCP9808(i2c)
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(ready_led, GPIO.OUT)
@@ -237,10 +239,10 @@ def runtimeplot(options):
     print('plot saved')
 
 def main():
-    sensor = init()
+    light_sensor, temp_sensor = init()
     options = load_options()
     add_csv_header(options.filename)
-    core(options, sensor)
+    core(options, light_sensor, temp_sensor)
     if options.graph_title:
         runtimeplot(options)
 
