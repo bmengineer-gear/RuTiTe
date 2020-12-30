@@ -13,6 +13,13 @@ To install this script, just copy rutite.py to the directory you're working in. 
 - argparse
 - sys
 - matplotlib
+
+Run the following commands to install all the required dependencies on a fresh install of Raspberry Pi OS:
+
+    pip3 install adafruit-blinka
+    pip3 install adafruit-circuitpython-tsl2591
+    pip3 install matplotlib
+
 # Usage
 At it's most basic, you can just run `python3 rutite.py`, and this script will fire up. It will print out to the terminal to let you know when it's ready for you to turn on a light and start the test, and record the runtime to a .csv file.
 ## Options
